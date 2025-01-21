@@ -62,33 +62,33 @@ if page == "Player Data":
         if x_val == y_val:
             st.warning("Please select different attributes for the x and y axes.")
         else:
-            # Filter the data based on selected players
+            # Use a separate filtered dataset for the scatter plot
+            scatter_data = filtered_players_data
             if player:
-                filtered_players_data = filtered_players_data[filtered_players_data['Name'].isin(player)]
-                st.dataframe(filtered_players_data)
+                scatter_data = scatter_data[scatter_data['Name'].isin(player)]
+                st.dataframe(scatter_data)
 
-                scatter = alt.Chart(filtered_players_data, title=f"{x_val} vs {y_val}").mark_point().encode(
-                    alt.X(x_val, title=f'{x_val}'),
-                    alt.Y(y_val, title=f'{y_val}'),
-                    color='Name',  # 'Name' can be used for categorical color encoding
-                    tooltip=['Name', 'Team', 'Position', x_val, y_val]
-                ).configure_mark(
-                    opacity=0.7
-                )
+            # Plot the scatter plot
+            scatter = alt.Chart(scatter_data, title=f"{x_val} vs {y_val}").mark_point().encode(
+                alt.X(x_val, title=f'{x_val}'),
+                alt.Y(y_val, title=f'{y_val}'),
+                color='Name',  # 'Name' can be used for categorical color encoding
+                tooltip=['Name', 'Team', 'Position', x_val, y_val]
+            ).configure_mark(
+                opacity=0.7
+            )
 
-                st.altair_chart(scatter, theme="streamlit", use_container_width=True)
-            else:
-                st.warning("Please select players to compare.")
+            st.altair_chart(scatter, theme="streamlit", use_container_width=True)
 
     # Bar Chart Tab
     with tab2:
         st.subheader("Bar Chart Controls")
 
-        # Sidebar-like controls moved to the main area for this tab
+        # Select attribute for the bar chart
         z_val = st.selectbox("Pick your attribute", filtered_players_data.select_dtypes(include=np.number).columns.tolist())
         count_input = st.number_input(f"Enter a value for the number of top {z_val} values to display", min_value=1, max_value=len(filtered_players_data), value=5, step=1)
 
-        # Filter dataset based on Team selection
+        # Filter dataset based on the top values (no player filtering)
         top_data = filtered_players_data.nlargest(count_input, z_val)
         bar = alt.Chart(top_data).mark_bar().encode(
             y=alt.Y('Name', title='Name', sort='-x'),
