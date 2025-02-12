@@ -44,7 +44,7 @@ if page == "Player Data":
     st.markdown("**Statistics for all Conference Carolinas players for the 2025 Men's Volleyball Season.**")
 
     # Create tabs for Scatter Plot and Bar Chart
-    tab1, tab2 = st.tabs(['Scatter Plot', 'Bar Chart'])
+    tab1, tab2, tab3 = st.tabs(['Scatter Plot', 'Bar Chart','Rotational Analysis'])
 
     # Scatter Plot Tab
     with tab1:
@@ -101,6 +101,33 @@ if page == "Player Data":
         )
 
         st.altair_chart(bar, use_container_width=True)
+        
+    with tab3:  # Third tab for Rotational Analysis
+        st.subheader("Rotational Analysis")
+
+    # Add content for rotational analysis here.
+        st.markdown("**Analysis of player attack attempts and hitting percentage by rotation.**")
+
+        rotation_columns = [col for col in filtered_players_data.columns if any(rot in col for rot in ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'])]
+
+    # Assuming the data contains fields for rotation analysis such as 'Attack Attempts' and 'Hitting Percentage'
+        x_val = st.selectbox("Pick your x-axis", rotation_columns,key="x_axis_rotation")
+        y_val = st.selectbox("Pick your y-axis", rotation_columns,key="y_axis_rotation")
+
+    # Ensure x_val and y_val are different
+        if x_val == y_val:
+            st.warning("Please select different attributes for the x and y axes.")
+        else:
+        # Create the scatter plot using the selected axes
+            scatter_data = filtered_players_data  # Use filtered player data for the scatter plot
+            scatter = alt.Chart(scatter_data, title=f"{x_val} vs {y_val} by Rotation").mark_point().encode(
+                alt.X(x_val, title=f'{x_val}'),
+                alt.Y(y_val, title=f'{y_val}'),
+                color='Name',  # Coloring by player name or any other relevant category
+                tooltip=['Name', 'Team', 'Position', x_val, y_val]
+            ).configure_mark(opacity=0.7)
+
+            st.altair_chart(scatter, theme="streamlit", use_container_width=True)
 
 # Team Data Page (no changes to Team Page, no count_input or z_val)
 elif page == "Team Data":
